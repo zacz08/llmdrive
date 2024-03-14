@@ -1,0 +1,14 @@
+# output & ckpts
+data/
+ckpt/
+
+
+# carla and leaderboard
+carla/
+
+# llm 
+llm_model/
+
+# cash
+__pycache__/
+.pyc

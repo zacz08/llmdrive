@@ -8,7 +8,7 @@ model:
   model_type: vicuna7b
   preception_model: memfuser_baseline_e1d3_return_feature
   preception_model_ckpt: ../vision_encoder/sensor_pretrain.pth.tar.r50
-  llm_model: /data/llava-v1.5-7b 
+  llm_model: /llm_model/llava-v1.5-7b 
   load_pretrained: True
   freeze_vit: True
   max_txt_len: 64 # max length of instruction

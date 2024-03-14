@@ -198,8 +198,11 @@ class Registry:
         """
         assert isinstance(path, str), "All path must be str."
         if name in cls.mapping["paths"]:
-            raise KeyError("Name '{}' already registered.".format(name))
-        cls.mapping["paths"][name] = path
+            # raise KeyError("Name '{}' already registered.".format(name))
+            print("Warning: Name '{}' already registered, skip...".format(name))
+        # cls.mapping["paths"][name] = path
+        else:
+            cls.mapping["paths"][name] = path
 
     @classmethod
     def register(cls, name, obj):

@@ -20,7 +20,7 @@ from torchvision import transforms
 from leaderboard.autoagents import autonomous_agent
 from team_code.planner import RoutePlanner, InstructionPlanner
 from team_code.pid_controller import PIDController
-from timm.models import create_model
+# from timm.models import create_model
 from lavis.common.registry import registry
 
 try:
