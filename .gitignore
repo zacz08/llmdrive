@@ -1,6 +1,8 @@
 # output & ckpts
 data/
 ckpt/
+eval/
+results/
 
 
 # carla and leaderboard

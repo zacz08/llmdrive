@@ -468,7 +468,7 @@ def main():
 
     # agent-related options
     parser.add_argument("-a", "--agent", type=str, help="Path to Agent's py file to evaluate",
-                        default='/home/zc/LMDrive/leaderboard/team_code/lmdriver_agent.py ')
+                        default='/home/zc/LMDrive/leaderboard/team_code/lmdriver_agent_new.py ')
     parser.add_argument("--agent-config", type=str, help="Path to Agent's configuration file",
                         default="/home/zc/LMDrive/leaderboard/team_code/lmdriver_config.py")
 
