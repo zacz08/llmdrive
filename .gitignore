@@ -3,6 +3,7 @@ data/
 ckpt/
 eval/
 results/
+output/
 
 
 # carla and leaderboard
