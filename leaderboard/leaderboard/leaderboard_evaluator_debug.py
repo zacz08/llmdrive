@@ -475,7 +475,7 @@ def main():
     parser.add_argument("--track", type=str, default='SENSORS', help="Participation track: SENSORS, MAP")
     parser.add_argument('--resume', type=bool, default=False, help='Resume execution from last checkpoint?')
     parser.add_argument("--checkpoint", type=str,
-                        default='/home/zc/LMDrive/results/sample_result.json',
+                        default='/home/zc/LMDrive/results/leaderboard_statistic_result.json',
                         help="Path to checkpoint used for saving statistics and resuming")
 
     arguments = parser.parse_args()
