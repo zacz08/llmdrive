@@ -465,7 +465,8 @@ parser.add_argument(
 parser.add_argument(
     "--cooldown-epochs",
     type=int,
-    default=10,
+    # default=10,
+    default=0,
     metavar="N",
     help="epochs to cooldown LR at min_lr, after cyclic schedule ends",
 )
@@ -903,7 +904,11 @@ def main():
     args.device = "cuda:0"
     args.world_size = 1
     args.rank = 0  # global rank
-    args.distributed = True
+    if "LOCAL_RANK" in os.environ:
+        args.local_rank = int(os.environ['LOCAL_RANK'])
+    else:
+        raise ValueError("Could not find 'LOCAL_RANK' in environment, make sure use 'torchrun' instead of 'torch.distributed.launch'")
+    # args.distributed = True
     if args.distributed:
         args.device = "cuda:%d" % args.local_rank
         torch.cuda.set_device(args.local_rank)
