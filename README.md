@@ -69,6 +69,17 @@ git clone https://github.com/opendilab/LMDrive.git
 cd LMDrive
 conda create -n lmdrive python=3.8
 conda activate lmdrive
+conda install pytorch==2.0.1 torchvision==0.15.2 torchaudio==2.0.2 pytorch-cuda=11.8 -c pytorch -c nvidia
+```
+
+Download torch-scatter with cuda support version
+```Shell
+pip install torch-scatter==2.1.1 -f https://data.pyg.org/whl/torch-2.0.1+cu117.html
+
+```
+
+Configurate vision encoder and LAVIS
+```Shell
 cd vision_encoder
 pip3 install -r requirements.txt
 python setup.py develop # if you have installed timm before, please uninstall it
