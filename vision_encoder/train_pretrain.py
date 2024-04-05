@@ -920,6 +920,8 @@ def main():
             % (args.rank, args.world_size)
         )
     else:
+        torch.cuda.set_device(args.local_rank)
+        torch.distributed.init_process_group(backend="nccl", init_method="env://")
         _logger.info("Training with a single process on 1 GPUs.")
     assert args.rank >= 0
 
