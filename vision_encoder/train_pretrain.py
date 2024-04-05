@@ -1205,9 +1205,9 @@ def main():
 
     train_loss_fns = {
         #"traffic": MVTL1Loss(1.0, l1_loss=l1_loss),
-        "traffic": LAVLoss(),
-        "waypoints": torch.nn.L1Loss(),
-        "cls": cls_loss,
+        "traffic": LAVLoss(),               # object detection
+        "waypoints": torch.nn.L1Loss(),     # future waypoints of ego vehicle
+        "cls": cls_loss,                    # traffic light status classification
         "stop_cls": cls_loss,
     }
     validate_loss_fns = {
@@ -1302,7 +1302,7 @@ def main():
                 ema_eval_metrics = validate(
                     model_ema.module,
                     loader_eval,
-                    validate_loss_fn,
+                    validate_loss_fns,
                     args,
                     amp_autocast=amp_autocast,
                     log_suffix=" (EMA)",
