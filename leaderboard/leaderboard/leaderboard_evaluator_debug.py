@@ -457,7 +457,7 @@ def main():
     # simulation setup
     parser.add_argument('--routes',
                         help='Name of the route to be executed. Point to the route_xml_file to be executed.',
-                        default='/home/zc/LMDrive/langauto/benchmark_long.xml')
+                        default='/home/zc/LMDrive/langauto/benchmark_tiny.xml')
     parser.add_argument('--scenarios',
                         help='Name of the scenario annotation file to be mixed with the route.',
                         default='/home/zc/LMDrive/leaderboard/data/official/all_towns_traffic_scenarios_public.json')
