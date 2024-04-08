@@ -857,11 +857,23 @@ class Memfuser(nn.Module):
         traffic_light_state_feature = hs[:, 2500]
         stop_sign_feature = hs[:, 2500]
         waypoints_feature = hs[:, 2501:2506]
+        # if self.return_feature:
+        #     traffic_feature = traffic_feature.reshape(bs, 50, 50, -1).permute(0, 3, 1, 2)
+        #     traffic_feature = F.adaptive_avg_pool2d(traffic_feature, (10, 10)).view(bs, -1, 100).permute(0, 2, 1)
+            
+        #     ## Modified for BEV visualisation
+        #     # return torch.cat([traffic_feature, traffic_light_state_feature.view(bs, 1, -1), waypoints_feature], 1)
+        #     result_with_feature = torch.cat([traffic_feature, traffic_light_state_feature.view(bs, 1, -1), waypoints_feature], 1)
+        #     return result_with_feature
+        #     return waypoints_feature[:, :5]
+    
+        ## Modified for BEV visualisation
+        traffic_feature_BEV = traffic_feature.reshape(bs, 50, 50, -1).permute(0, 3, 1, 2)
+        traffic_feature_BEV = F.adaptive_avg_pool2d(traffic_feature_BEV, (10, 10)).view(bs, -1, 100).permute(0, 2, 1)
+        result_with_feature = torch.cat([traffic_feature_BEV, traffic_light_state_feature.view(bs, 1, -1), waypoints_feature], 1)
         if self.return_feature:
-            traffic_feature = traffic_feature.reshape(bs, 50, 50, -1).permute(0, 3, 1, 2)
-            traffic_feature = F.adaptive_avg_pool2d(traffic_feature, (10, 10)).view(bs, -1, 100).permute(0, 2, 1)
-            return torch.cat([traffic_feature, traffic_light_state_feature.view(bs, 1, -1), waypoints_feature], 1)
-            return waypoints_feature[:, :5]
+            return result_with_feature
+        ## Modify End
 
         if self.waypoints_pred_head == "gru":
             waypoints = self.waypoints_generator(waypoints_feature, target_point)
@@ -875,7 +887,7 @@ class Memfuser(nn.Module):
         velocity = velocity.repeat(1, 2500, 32)
         traffic_feature_with_vel = torch.cat([traffic_feature, velocity], dim=2)
         traffic = self.traffic_pred_head(traffic_feature_with_vel)
-        return traffic, waypoints, traffic_light_state, stop_sign, traffic_feature
+        return traffic, waypoints, traffic_light_state, stop_sign, traffic_feature, result_with_feature
 
 
 @register_model
