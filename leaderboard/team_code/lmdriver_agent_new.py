@@ -510,7 +510,14 @@ class LMDriveAgent(autonomous_agent.AutonomousAgent):
         input_data['num_points'] = torch.tensor([tick_data['num_points']]).cuda().unsqueeze(0)
         input_data['velocity'] = torch.tensor([tick_data['speed']]).cuda().view(1, 1).float()
         input_data['text_input'] = [self.curr_instruction]
-        image_embeds = self.net.visual_encoder(input_data)
+        # image_embeds = self.net.visual_encoder(input_data)
+
+        # modified return data format for BEV visualisation
+        if not self.net.visual_encoder.return_feature:
+            traffic, waypoints, traffic_light_state, stop_sign, traffic_feature, image_embeds = self.net.visual_encoder(input_data)
+        else:
+            image_embeds = self.net.visual_encoder(input_data)
+
         image_embeds = self.update_and_collect(image_embeds)
         input_data['valid_frames'] = [image_embeds.size(1)]
 
@@ -552,7 +559,9 @@ class LMDriveAgent(autonomous_agent.AutonomousAgent):
 
         ################# BEV visulisation #################
 
-        # surround_map, box_info = render(metadata.reshape(20, 20, 7), pixels_per_meter=20)
+        BEV_parse = traffic.cpu()
+        # surround_map, box_info = render(BEV_parse.reshape(20, 20, 7), pixels_per_meter=20)
+        surround_map = render(BEV_parse.reshape(50, 50, 8), pixels_per_meter=20)
         # surround_map = surround_map[:400, 160:560]
         # surround_map = np.stack([surround_map, surround_map, surround_map], 2)
 
@@ -565,17 +574,6 @@ class LMDriveAgent(autonomous_agent.AutonomousAgent):
 
         # surround_map = np.clip((surround_map.astype(np.float32) + self_car_map.astype(np.float32)), 0, 255, ).astype(np.uint8)
 
-        # map_t1, box_info = render(metadata.reshape(20, 20, 7), pixels_per_meter=20, t=1)
-        # map_t1 = map_t1[:400, 160:560]
-        # map_t1 = np.stack([map_t1, map_t1, map_t1], 2)
-        # map_t1 = np.clip(map_t1.astype(np.float32) + self_car_map.astype(np.float32), 0, 255).astype(np.uint8)
-        # map_t1 = cv2.resize(map_t1, (200, 200))
-        # map_t2, box_info = render(metadata.reshape(20, 20, 7), pixels_per_meter=20, t=2)
-        # map_t2 = map_t2[:400, 160:560]
-        # map_t2 = np.stack([map_t2, map_t2, map_t2], 2)
-        # map_t2 = np.clip(map_t2.astype(np.float32) + self_car_map.astype(np.float32), 0, 255).astype(np.uint8)
-        # map_t2 = cv2.resize(map_t2, (200, 200))
-
         ################# BEV visulisation END #################
 
         display_data = {}
@@ -584,7 +582,7 @@ class LMDriveAgent(autonomous_agent.AutonomousAgent):
         display_data['rgb_right'] = cv2.resize(tick_data['rgb_right'], (280, 210))
         display_data['rgb_front'] = cv2.resize(tick_data['rgb_front'], (280, 210))
         display_data['rgb_rear'] = cv2.resize(tick_data['rgb_rear'], (280, 210))
-        # display_data['bev'] = cv2.resize(map_t1, (420, 420))
+        display_data['bev'] = cv2.resize(surround_map, (420, 420))
         if self.active_misleading_instruction:
             display_data['instruction'] = "Instruction: [Misleading] %s" % input_data['text_input'][0]
         else:

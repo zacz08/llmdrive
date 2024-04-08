@@ -21,7 +21,8 @@ class GlobalConfig:
     clip_delta = 0.35  # maximum change in speed input to logitudinal controller
 
     # the model architecture of the vision encoder.
-    preception_model = 'memfuser_baseline_e1d3_return_feature'
+    # preception_model = 'memfuser_baseline_e1d3_return_feature'
+    preception_model = 'memfuser_baseline_e1d3'
 
     # the checkpoint path of the vision encoder (obtained in the vision encoder pretraining stage).
     preception_model_ckpt = '/home/zc/LMDrive/ckpt/vision-encoder-r50.pth.tar'
