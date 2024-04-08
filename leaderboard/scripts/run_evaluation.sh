@@ -2,7 +2,8 @@
 export PT=$(($RANDOM % 1000 + 16000))
 bash carla/CarlaUE4.sh --world-port=$PT &
 
-sleep 4
+# if the evaluator crash, run the carla simulator first, then execute this bash file in a new terminal
+sleep 6
 
 export CARLA_ROOT=/home/zc/LMDrive/carla
 export CARLA_SERVER=${CARLA_ROOT}/CarlaUE4.sh
@@ -19,12 +20,12 @@ export PORT=$PT # same as the carla server port
 export TM_PORT=$(($PT+500)) # port for traffic manager, required when spawning multiple servers/clients
 export DEBUG_CHALLENGE=0
 export REPETITIONS=1 # multiple evaluation runs
-# export ROUTES=/home/zc/LMDrive/langauto/benchmark_tiny.xml
-export ROUTES=/home/zc/LMDrive/langauto/benchmark_short.xml
+export ROUTES=/home/zc/LMDrive/langauto/benchmark_tiny.xml
+# export ROUTES=/home/zc/LMDrive/langauto/benchmark_short.xml
 # export ROUTES=/home/zc/LMDrive/langauto/benchmark_long.xml
 export TEAM_AGENT=/home/zc/LMDrive/leaderboard/team_code/lmdriver_agent.py # agent
 export TEAM_CONFIG=/home/zc/LMDrive/leaderboard/team_code/lmdriver_config.py # model checkpoint, not required for expert
-export CHECKPOINT_ENDPOINT=results/sim_short_result.json # leaderboard statistic results file
+export CHECKPOINT_ENDPOINT=results/sim_test_result.json # leaderboard statistic results file
 #export SCENARIOS=leaderboard/data/scenarios/no_scenarios.json #town05_all_scenarios.json
 export SCENARIOS=${LEADERBOARD_ROOT}/data/official/all_towns_traffic_scenarios_public.json
 export SAVE_PATH=data/eval # path for saving episodes while evaluating
