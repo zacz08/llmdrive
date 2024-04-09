@@ -53,7 +53,7 @@ def find_peak_box(data):
 def render_self_car(loc, ori, box, pixels_per_meter=5, max_distance=30):
     img_size = max_distance * pixels_per_meter * 2
     img = np.zeros((img_size, img_size, 3), np.uint8)
-    color = np.array([1, 1, 1])
+    color = np.array([1, 1, 0])
     new_img = add_rect(img, loc, ori, box, 255, pixels_per_meter, max_distance, color)
     return new_img
 
@@ -77,7 +77,7 @@ def render(det_data, pixels_per_meter=5, max_distance=30, t=0):
         if box[0] < 1.5:
             box = box * 1.5
         color = np.array([1, 1, 1])
-        new_img = add_rect(
+        act_img = add_rect(
             act_img, loc, ori, box, 255, pixels_per_meter, max_distance, color
         )
         act_img = np.clip(act_img, 0, 255)
