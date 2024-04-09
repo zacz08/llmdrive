@@ -84,9 +84,7 @@ class DisplayInterface(object):
         pygame.display.set_caption("LMDrive Agent")
 
     def run_interface(self, input_data):
-        # bev = input_data['bev']
         surface = np.zeros((420, 1820, 3),np.uint8)
-        # surface[:, :420] = bev
 
         # camera images 
         surface[:210, :280] = input_data['rgb_left']
@@ -97,6 +95,9 @@ class DisplayInterface(object):
         # surface = cv2.putText(surface, 'Front Camera', (535,245), cv2.FONT_HERSHEY_TRIPLEX,0.75,(173,216,230), 2)
         # surface = cv2.putText(surface, 'Right Camera', (980,245), cv2.FONT_HERSHEY_TRIPLEX,0.75,(173,216,230), 2)
         # surface = cv2.putText(surface, 'Rear Camera', (980,245), cv2.FONT_HERSHEY_TRIPLEX,0.75,(173,216,230), 2)
+
+        # BEV image
+        surface[:420, 1400:] = input_data['bev']
 
         # Main front view with text output
         font = cv2.FONT_HERSHEY_TRIPLEX
@@ -561,18 +562,20 @@ class LMDriveAgent(autonomous_agent.AutonomousAgent):
 
         BEV_parse = traffic.cpu()
         # surround_map, box_info = render(BEV_parse.reshape(20, 20, 7), pixels_per_meter=20)
-        surround_map = render(BEV_parse.reshape(50, 50, 8), pixels_per_meter=20)
+        surround_map = render(BEV_parse.reshape(50, 50, 8), pixels_per_meter=5)
+        # surround_map = render(BEV_parse.reshape(400, 200, 8), pixels_per_meter=20)
         # surround_map = surround_map[:400, 160:560]
-        # surround_map = np.stack([surround_map, surround_map, surround_map], 2)
+        surround_map = np.stack([surround_map, surround_map, surround_map], 2)
 
-        # self_car_map = render_self_car(
-        #     loc=np.array([0, 0]),
-        #     ori=np.array([0, -1]),
-        #     box=np.array([2.45, 1.0]),
-        #     color=[1, 1, 0], pixels_per_meter=20
+        self_car_map = render_self_car(
+            loc=np.array([0, 0]),
+            ori=np.array([0, -1]),
+            box=np.array([2.45, 1.0]),
+            pixels_per_meter=5
+        )
         # )[:400, 160:560]
 
-        # surround_map = np.clip((surround_map.astype(np.float32) + self_car_map.astype(np.float32)), 0, 255, ).astype(np.uint8)
+        surround_map = np.clip((surround_map.astype(np.float32) + self_car_map.astype(np.float32)), 0, 255, ).astype(np.uint8)
 
         ################# BEV visulisation END #################
 
