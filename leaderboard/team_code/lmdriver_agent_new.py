@@ -561,9 +561,7 @@ class LMDriveAgent(autonomous_agent.AutonomousAgent):
         ################# BEV visulisation #################
 
         BEV_parse = traffic.cpu()
-        # surround_map, box_info = render(BEV_parse.reshape(20, 20, 7), pixels_per_meter=20)
         surround_map = render(BEV_parse.reshape(50, 50, 8), pixels_per_meter=5)
-        # surround_map = render(BEV_parse.reshape(400, 200, 8), pixels_per_meter=20)
         # surround_map = surround_map[:400, 160:560]
         surround_map = np.stack([surround_map, surround_map, surround_map], 2)
 
