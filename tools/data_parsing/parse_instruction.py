@@ -93,13 +93,16 @@ def process(line):
     try:
         processed_data = []
         path, frames = line.split()
-        dir_path = os.path.join(dataset_root, path)
+        # dir_path = os.path.join(dataset_root, , path)
         frames = int(frames.strip())
-        town_id = int(re.findall(r'town(\d\d)', dir_path)[0])
-        weather_id = int(re.findall(r'_w(\d+)_', dir_path)[0])
+        # town_id = int(re.findall(r'town(\d\d)', dir_path)[0])
+        # weather_id = int(re.findall(r'_w(\d+)_', dir_path)[0])
+        town_id = int(re.findall(r'town(\d\d)', path)[0])
+        weather_id = int(re.findall(r'_w(\d+)_', path)[0])
         json_data = []
         for frame_id in tqdm(range(frames)):
-            full_path = os.path.join(dir_path, 'measurements_full', "%04d.json" % frame_id)
+            # full_path = os.path.join(dir_path, "Town%02d/", 'measurements_full', "%04d.json" % town_id % frame_id)
+            full_path = os.path.join(dataset_root, 'data', f"Town{town_id:02d}", path, 'measurements_full', f"{frame_id:04d}.json")
             value_json = json.load(open(full_path, 'r'))
             json_data.append(value_json)
 
