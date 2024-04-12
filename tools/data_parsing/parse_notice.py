@@ -88,20 +88,18 @@ for i, key in enumerate(registered_class.keys()):
     rule_id_mapping_dict[key] = i
 
 notice_processing_rules = ['Notice-01','Notice-02','Notice-03','Notice-04','Notice-05','Notice-05','Notice-06','Notice-07','Notice-08-R','Notice-08-G','Notice-08-Y']
-notice_data = {}
 
 def process_notice(line):
     try:
         processed_data = []
         path, frames = line.split()
-        dir_path = os.path.join(dataset_root, path)
         frames = int(frames.strip())
-        town_str = re.findall(r'town(\d\d)', dir_path)[0]
+        town_str = re.findall(r'town(\d\d)', path)[0]
         town_id = int(town_str)
-        weather_id = int(re.findall(r'_w(\d+)_', dir_path)[0])
+        weather_id = int(re.findall(r'_w(\d+)_', path)[0])
         json_data = []
         for frame_id in tqdm(range(frames)):
-            full_path = os.path.join(dir_path, 'measurements_full', "%04d.json" % frame_id)
+            full_path = os.path.join(dataset_root, 'data', f"Town{town_id:02d}", path, 'measurements_full', f"{frame_id:04d}.json")
             value_json = json.load(open(full_path, 'r'))
             json_data.append(value_json)
 
@@ -117,6 +115,7 @@ def process_notice(line):
                 result['town_id'] = town_id
                 result['weather_id'] = weather_id
                 result['route_path'] = path
+                # result['route_frames'] = int(line.split()[1])
                 result['route_frames'] = frames
                 processed_data.append(result)
 
@@ -139,7 +138,6 @@ def process_notice(line):
 
 if __name__ == '__main__':
     dataset_root = sys.argv[1]
-    output_dir = dataset_root
     curr_dir = Path(__file__).parent
     scenarios_dir = os.path.join(curr_dir, "../../", "leaderboard/data/scenarios")
     lines = open(os.path.join(dataset_root, "dataset_index.txt")).readlines()
@@ -147,7 +145,8 @@ if __name__ == '__main__':
     with Pool(8) as p:
         n_list = list(tqdm(p.imap(process_notice, lines), total=len(lines)))
 
-    f_write_notice = open(os.path.join(output_dir, "notice_instruction_list.json"), 'w')
+    notice_data = {}
+
     for results in n_list:
         if not results:
             continue
@@ -157,6 +156,7 @@ if __name__ == '__main__':
                 notice_data[route_key] = []
             notice_data[route_key].append(result)
 
-    processed_json = json.dumps(notice_data)
+    processed_json = json.dumps(notice_data, indent=4)
+    f_write_notice = open(os.path.join(dataset_root, "notice_instruction_list.json"), 'w')
     f_write_notice.write(processed_json)
     f_write_notice.close()
