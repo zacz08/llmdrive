@@ -11,15 +11,17 @@ snapshot_download(
         "*.md", 
         "*town01*",
         "*town02*",
-        "*town03*",
+        # "*town03*",
         "*town04*",
-        "*town05*",
-        "*town06*",
-        "*town10*",
-        "*long*",
-        "*short*"
+        # "*town05*",
+        # "*town06*",
+        # "*town07*",
+        # "*town10*",
+        # "*long*",
+        # "*short*",
+        "*tiny*"
         ], 
-    cache_dir='Zachary/03_Data/python_Project/LMDrive/dataset',     # replace with your dictionary as needed
+    cache_dir='/users/rrg517/scratch/datasets/LMDrive',     # replace with your dictionary as needed
     local_dir_use_symlinks=True,
     etag_timeout=120,
     resume_download=True
