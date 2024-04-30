@@ -1,5 +1,5 @@
 #!/bin/bash
-export DATA_ROOT=dataset
+export DATA_ROOT='/home/zc/datasets/sudo_nuscenes'
 export YAML_ROOT=data_collection/
 export CARLA_ROOT=carla
 export CARLA_SERVER=${CARLA_ROOT}/CarlaUE4.sh
