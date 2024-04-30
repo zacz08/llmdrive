@@ -27,7 +27,7 @@ dt['measurements_full'] = '%04d.json'
 
 def process(task):
     route_dir, end_id, length = task
-    for i in range(end_id - length + 6, end_id - 3):
+    for i in range(end_id - length + 8, end_id - 3):
         for key in dt:
             try:
                 os.remove(os.path.join(route_dir, key, dt[key] % i))

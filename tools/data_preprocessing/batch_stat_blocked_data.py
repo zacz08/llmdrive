@@ -45,12 +45,19 @@ def process(route_dir):
 
 
 if __name__ == "__main__":
-    dataset_root = sys.argv[1]
+    if len(sys.argv) == 1:
+        print("Usage: python get_list_file.py $DATASET_ROOT")
+        sys.exit(0)
+    else:
+        dataset_root = sys.argv[1]
+    
     list_file = os.path.join(dataset_root, 'dataset_index.txt')
+    towns = os.listdir(os.path.join(dataset_root, 'data'))
     routes = []
     for line in open(list_file, "r").readlines():
-        path = line.split()[0].strip()
-        routes.append(os.path.join(dataset_root, path))
+        for town in towns:
+            route_folder = line.split()[0].strip()
+            routes.append(os.path.join(dataset_root, 'data', town, route_folder))
 
     f = open(os.path.join(dataset_root, "blocked_stat.txt"), "w")
     with Pool(8) as p:
