@@ -169,6 +169,7 @@ routes_town01_short_w2_11_16_11_44_08/ 569
 Here, `<relative_route_path_dir>` should be a relative path to the `$DATASET_ROOT`. The training code will concatenate the `$DATASET_ROOT` and `<relative_route_path_dir>` to create the full path for loading the data. 
 In this format, 1062 represents the number of frames in the routes_town06_long_w7_11_28_18_28_35/rgb_full directory or routes_town06_long_w7_11_28_18_28_35/lidar, etc.
 
+
 ### Data Generation
 #### Data Generation with multiple CARLA Servers
 In addition to the dataset, we have also provided all the scripts used for generating data and these can be modified as required for different CARLA versions. The dataset is collected by a rule-based expert agent in different weathers and towns.
@@ -201,16 +202,8 @@ If the docker container doesn't start properly then add another environment vari
 ##### Run the Autopilot
 Generate scripts for collecting data in batches.
 ```bash
-cd dataset
-python init_dir.py
-cd ..
 cd data_collection
-python generate_yamls.py # You can modify FPS, waypoints distribution strength ...
-
-# If you do not use 4 servers, the following Python scripts are needed to modify
-python generate_bashs.py
-python generate_batch_collect.py 
-cd ..
+python generate_dataset.py
 ```
 
 Run batch-run scripts of the town and route type that you need to collect.
