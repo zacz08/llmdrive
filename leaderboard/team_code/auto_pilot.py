@@ -15,6 +15,8 @@ import carla
 from carla_birdeye_view import BirdViewProducer, BirdViewCropType, PixelDimensions
 from PIL import Image
 
+import sys
+sys.path.append('/home/zc/LMDrive/leaderboard')
 from team_code.map_agent import MapAgent
 from team_code.pid_controller import PIDController
 from agents.navigation.local_planner import RoadOption
