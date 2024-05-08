@@ -12,6 +12,3 @@ def generate_batch_collect(routes, server_num):
         fw = open("batch_run/run_route_%s.sh" % route, "w")
         for i in range(server_num):
             fw.write("bash data_collection/bashs/sub-%d/%s.sh & \n" % (i, route))
-
-if __name__=='__main__':
-    main()
