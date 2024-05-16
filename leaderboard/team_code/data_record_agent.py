@@ -1,56 +1,8 @@
-import os
-import time
-import datetime
-import pathlib
-import json
 import random
-import shapely
-import math
-from collections import deque
-from itertools import chain
-
 import numpy as np
-import cv2
 import carla
-from carla_birdeye_view import BirdViewProducer, BirdViewCropType, PixelDimensions
-from PIL import Image
 
-import sys
-sys.path.append('/home/zc/LMDrive/leaderboard')
-from team_code.map_agent import MapAgent
-from team_code.pid_controller import PIDController
-from agents.navigation.local_planner import RoadOption
-from srunner.scenariomanager.carla_data_provider import CarlaDataProvider
-
-
-WEATHERS = {
-    "ClearNoon": carla.WeatherParameters.ClearNoon,
-    "ClearSunset": carla.WeatherParameters.ClearSunset,
-    "CloudyNoon": carla.WeatherParameters.CloudyNoon,
-    "CloudySunset": carla.WeatherParameters.CloudySunset,
-    "WetNoon": carla.WeatherParameters.WetNoon,
-    "WetSunset": carla.WeatherParameters.WetSunset,
-    "MidRainyNoon": carla.WeatherParameters.MidRainyNoon,
-    "MidRainSunset": carla.WeatherParameters.MidRainSunset,
-    "WetCloudyNoon": carla.WeatherParameters.WetCloudyNoon,
-    "WetCloudySunset": carla.WeatherParameters.WetCloudySunset,
-    "HardRainNoon": carla.WeatherParameters.HardRainNoon,
-    "HardRainSunset": carla.WeatherParameters.HardRainSunset,
-    "SoftRainNoon": carla.WeatherParameters.SoftRainNoon,
-    "SoftRainSunset": carla.WeatherParameters.SoftRainSunset,
-    "ClearNight": carla.WeatherParameters(5.0,0.0,0.0,10.0,-1.0,-90.0,60.0,75.0,1.0,0.0),
-    "CloudyNight": carla.WeatherParameters(60.0,0.0,0.0,10.0,-1.0,-90.0,60.0,0.75,0.1,0.0),
-    "WetNight": carla.WeatherParameters(5.0,0.0,50.0,10.0,-1.0,-90.0,60.0,75.0,1.0,60.0),
-    "WetCloudyNight": carla.WeatherParameters(60.0,0.0,50.0,10.0,-1.0,-90.0,60.0,0.75,0.1,60.0),
-    "SoftRainNight": carla.WeatherParameters(60.0,30.0,50.0,30.0,-1.0,-90.0,60.0,0.75,0.1,60.0),
-    "MidRainyNight": carla.WeatherParameters(80.0,60.0,60.0,60.0,-1.0,-90.0,60.0,0.75,0.1,80.0),
-    "HardRainNight": carla.WeatherParameters(100.0,100.0,90.0,100.0,-1.0,-90.0,100.0,0.75,0.1,100.0),
-}
-WEATHERS_IDS = list(WEATHERS)
-
-
-def get_entry_point():
-    return "DataRecorder"
+# from team_code.planner import RoutePlanner
 
 
 def _numpy(carla_vector, normalize=False):
@@ -105,6 +57,11 @@ class DataRecorder():
             False  # if the ego vehicle is influenced by a stop sign
         )
         self._traffic_lights = list()
+        # self._command_planner = RoutePlanner(7.5, 25.0, 257)
+        # self._waypoint_planner = RoutePlanner(4.0, 50)
+        # self._plan_gps_HACK = global_plan_gps
+        # self._waypoint_planner.set_route(self._plan_gps_HACK, True)
+        self.weather_id = random.randint(0, 20)
 
     def get_matrix(self, transform):
         """
@@ -232,6 +189,23 @@ class DataRecorder():
             return None
 
     
+    def _weather_to_dict(self, carla_weather):
+            weather = {
+                "cloudiness": carla_weather.cloudiness,
+                "precipitation": carla_weather.precipitation,
+                "precipitation_deposits": carla_weather.precipitation_deposits,
+                "wind_intensity": carla_weather.wind_intensity,
+                "sun_azimuth_angle": carla_weather.sun_azimuth_angle,
+                "sun_altitude_angle": carla_weather.sun_altitude_angle,
+                "fog_density": carla_weather.fog_density,
+                "fog_distance": carla_weather.fog_distance,
+                "wetness": carla_weather.wetness,
+                "fog_falloff": carla_weather.fog_falloff,
+            }
+
+            return weather
+
+    
     def tick(self, input_data):
         self._actors = self._world.get_actors()
         self._traffic_lights = get_nearby_lights(
@@ -241,14 +215,25 @@ class DataRecorder():
             self._vehicle, self._actors.filter("*stop*")
         )
 
-        # topdown = input_data["map"][1][:, :, 2]
-        # topdown = draw_traffic_lights(topdown, self._vehicle, self._traffic_lights)
-        # topdown = draw_stop_signs(topdown, self._vehicle, self._stop_signs)
+        affordances = self._get_affordances()
+        bb_3d = self._get_3d_bbs(max_distance=50)
+        # gps = input_data["gps"][1][:2]
+        gps_data = input_data["gps"][1]
+        gps = [gps_data.latitude, gps_data.longitude]
+        # speed = input_data["speed"][1]["speed"]
+        speed = 0
+        compass = input_data["imu"][1].compass
+        weather = self._weather_to_dict(self._world.get_weather())
 
-        # result = super().tick(input_data)
-        # result["topdown"] = topdown
-
-        # return result
+        return {
+                "lidar": input_data["lidar"][1],
+                "gps": gps,
+                "speed": speed,
+                "compass": compass,
+                "weather": weather,
+                "affordances": affordances,
+                "3d_bbs": bb_3d,
+            }
 
 
     def _get_affordances(self):
@@ -334,6 +319,111 @@ class DataRecorder():
             data[_id]["taigger_loc"] = [loc.x, loc.y, loc.z]
             data[_id]["trigger_ori"] = [ori.x, ori.y, ori.z]
             data[_id]["trigger_box"] = [box.x, box.y]
+        return data
+    
+
+    def _get_position(self, tick_data):
+        gps = tick_data["gps"]
+        gps = (gps - self._command_planner.mean) * self._command_planner.scale
+
+        return gps
+
+
+    def _should_brake(self, command):
+        actors = self._world.get_actors()
+
+        vehicle = self._is_vehicle_hazard(actors.filter("*vehicle*"), command)
+        lane_vehicle = self._is_lane_vehicle_hazard(actors.filter("*vehicle*"), command)
+        junction_vehicle = self._is_junction_vehicle_hazard(
+            actors.filter("*vehicle*"), command
+        )
+        light = self._is_light_red(actors.filter("*traffic_light*"))
+        walker = self._is_walker_hazard(actors.filter("*walker*"))
+        bike = self._is_bike_hazard(actors.filter("*vehicle*"))
+        stop_sign = self._is_stop_sign_hazard(actors.filter("*stop*"))
+
+        # record the reason for braking
+        self.is_vehicle_present = [x.id for x in vehicle]
+        self.is_lane_vehicle_present = [x.id for x in lane_vehicle]
+        self.is_junction_vehicle_present = [x.id for x in junction_vehicle]
+        self.is_pedestrian_present = [x.id for x in walker]
+        self.is_bike_present = [x.id for x in bike]
+        self.is_red_light_present = [x.id for x in light]
+        self.is_stop_sign_present = [x.id for x in stop_sign]
+
+        return any(
+            len(x) > 0
+            for x in [
+                vehicle,
+                lane_vehicle,
+                junction_vehicle,
+                bike,
+                light,
+                walker,
+                stop_sign,
+            ]
+        )
+
+
+    def get_measurement(self, input_data):
+
+        tick_data = self.tick(input_data)
+        # pos = self._get_position(tick_data)
+        theta = tick_data["compass"]
+        speed = tick_data["speed"]
+        weather = tick_data["weather"]
+        near_node, far_node = [0, 0], [0, 0]
+        near_command = ''
+        steer, throttle, brake, target_speed = None, None, None, None
+        actors = self._world.get_actors()
+        loc = self._vehicle.get_location()
+        self._loc = [loc.x, loc.y]
+        light = self._is_light_red(actors.filter("*traffic_light*"))
+        walker = self._is_walker_hazard(actors.filter("*walker*"))
+        bike = self._is_bike_hazard(actors.filter("*vehicle*"))
+        stop_sign = self._is_stop_sign_hazard(actors.filter("*stop*"))
+
+        # record the reason for braking
+        self.is_pedestrian_present = [x.id for x in walker]
+        self.is_bike_present = [x.id for x in bike]
+        self.is_red_light_present = [x.id for x in light]
+        self.is_stop_sign_present = [x.id for x in stop_sign]
+
+        data = {
+            # "gps_x": pos[0],
+            # "gps_y": pos[1],
+            "x": self._loc[0],
+            "y": self._loc[1],
+            "theta": theta,
+            "speed": speed,
+            # "target_speed": target_speed,
+            # "x_command": far_node[0],
+            # "y_command": far_node[1],
+            # "command": near_command.value,
+            # "gt_command": self._command_planner.route[0][1].value,
+            # "steer": steer,
+            # "throttle": throttle,
+            # "brake": brake,
+            "weather": weather,
+            "weather_id": self.weather_id,
+            # "near_node_x": near_node[0],
+            # "near_node_y": near_node[1],
+            # "far_node_x": far_node[0],
+            # "far_node_y": far_node[1],
+            # "is_junction": self.is_junction,
+            # "is_vehicle_present": self.is_vehicle_present,
+            "is_bike_present": self.is_bike_present,
+            # "is_lane_vehicle_present": self.is_lane_vehicle_present,
+            # "is_junction_vehicle_present": self.is_junction_vehicle_present,
+            "is_pedestrian_present": self.is_pedestrian_present,
+            "is_red_light_present": self.is_red_light_present,
+            "is_stop_sign_present": self.is_stop_sign_present,
+            # "should_slow": int(self.should_slow),
+            # "should_brake": int(self.should_brake),
+            # "future_waypoints": self._waypoint_planner.get_future_waypoints(50),
+            # "affected_light_id": self.affected_light_id,
+        }
+
         return data
     
 
