@@ -823,11 +823,10 @@ class LAVLoss:
         loc_loss = (prob * self.loc_criterion(output[:, :, 1:3], target[:, :, 1:3])).mean() / prob_mean
         box_loss = (prob * self.box_criterion(output[:, :, 3:5], target[:, :, 3:5])).mean() / prob_mean
         ori_loss = (prob * self.ori_criterion(output[:, :, 5:7], target[:, :, 5:7])).mean() / prob_mean
-        # spd_loss = (prob * self.ori_criterion(output[:, :, 7:8], target[:, :, 7:8])).mean() / prob_mean
+        spd_loss = (prob * self.ori_criterion(output[:, :, 7:8], target[:, :, 7:8])).mean() / prob_mean
 
         det_loss = 0.4 * det_loss + 0.2 * loc_loss + 0.2 * box_loss + 0.2 * ori_loss
-        # return det_loss, spd_loss
-        return det_loss
+        return det_loss, spd_loss
 
 
 class MVTL1Loss:
@@ -1414,13 +1413,14 @@ def train_one_epoch(
                 output[2], target[3]
             )
             loss_stop_sign = loss_fns["stop_cls"](output[3], target[6])
-            loss = (
-                loss_traffic * 0.5
-                + loss_waypoints * 0.5
-                + loss_velocity * 0.05
-                + loss_traffic_light_state * 0.1
-                + loss_stop_sign * 0.01
-            )
+            # loss = (
+            #     loss_traffic * 0.5
+            #     + loss_waypoints * 0.5
+            #     # + loss_velocity * 0.05
+            #     + loss_traffic_light_state * 0.1
+            #     + loss_stop_sign * 0.01
+            # )
+            loss = loss_traffic
 
         if not args.distributed:
             losses_traffic.update(loss_traffic.item(), batch_size)
@@ -1464,9 +1464,9 @@ def train_one_epoch(
                 losses_m.update(reduced_loss.item(), batch_size)
                 reduced_loss_traffic = reduce_tensor(loss_traffic.data, args.world_size)
                 losses_traffic.update(reduced_loss_traffic.item(), batch_size)
-                reduced_loss_velocity = reduce_tensor(
-                    loss_velocity.data, args.world_size
-                )
+                # reduced_loss_velocity = reduce_tensor(
+                #     loss_velocity.data, args.world_size
+                # )
                 # losses_velocity.update(reduced_loss_velocity.item(), batch_size)
 
                 reduced_loss_waypoints = reduce_tensor(
@@ -1488,9 +1488,9 @@ def train_one_epoch(
                     writer.add_scalar(
                         "train/loss_traffic", reduced_loss_traffic.item(), num_updates
                     )
-                    writer.add_scalar(
-                        "train/loss_velocity", reduced_loss_velocity.item(), num_updates
-                    )
+                    # writer.add_scalar(
+                    #     "train/loss_velocity", reduced_loss_velocity.item(), num_updates
+                    # )
                     writer.add_scalar(
                         "train/loss_waypoints",
                         reduced_loss_waypoints.item(),
@@ -1693,13 +1693,14 @@ def validate(
             on_road_mask = target[2] < 0.5
             loss_traffic_light_state = loss_fns["cls"](output[2], target[3])
             loss_stop_sign = loss_fns["stop_cls"](output[3], target[6])
-            loss = (
-                loss_traffic * 0.5
-                + loss_waypoints * 0.5
-                + loss_velocity * 0.05
-                + loss_traffic_light_state * 0.1
-                + loss_stop_sign * 0.01
-            )
+            # loss = (
+            #     loss_traffic * 0.5
+            #     + loss_waypoints * 0.5
+            #     # + loss_velocity * 0.05
+            #     + loss_traffic_light_state * 0.1
+            #     + loss_stop_sign * 0.01
+            # )
+            loss = loss_traffic
 
             traffic_light_state_error = accuracy(
                 output[2], target[3]
