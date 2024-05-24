@@ -87,7 +87,7 @@ cd ../LAVIS
 pip3 install -r requirements.txt
 python setup.py develop # if you have installed LAVIS before, please uninstall it
 
-pip install flash-attn --no-build-isolation # optional
+pip install flash-attn==0.2.4 --no-build-isolation # optional
 ```
 
 Download and setup CARLA 0.9.10.1
@@ -111,6 +111,20 @@ If you are interested in including any other details in Model Zoo, please open a
 | LMDrive-1.0 (LLaMA-7B) | 7B |  [LMDrive-llama-7b-v1.0](https://huggingface.co/OpenDILabCommunity/LMDrive-llama-7b-v1.0) | [R50](https://huggingface.co/OpenDILabCommunity/LMDrive-vision-encoder-r50-v1.0) | [LLaMA-7B](https://huggingface.co/huggyllama/llama-7b) | 31.3 | 42.8 |
 
 *DS denotes the driving score*
+
+
+To download weights, you may need Git Lfs. Here is the simple step for setting Git LFS:
+
+Download and install Git LFS
+```Shell
+sudo apt-get update
+sudo apt-get install git-lfs
+```
+
+Initialize Git LFS
+```Shell
+git lfs install
+```
 
 ## Dataset
 
