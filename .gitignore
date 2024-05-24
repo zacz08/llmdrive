@@ -11,6 +11,7 @@ carla/
 
 # llm 
 llm_model/
+llms/
 
 # cash
 __pycache__/
