@@ -1,11 +1,15 @@
 #!/bin/bash
 export PT=$(($RANDOM % 1000 + 16000))
-bash carla/CarlaUE4.sh --world-port=$PT &
+# bash /home/zc/carla/0_9_10_1/CarlaUE4.sh --world-port=$PT &
+export SDL_VIDEODRIVER=offscreen 
+export SDL_HINT_CUDA_DEVICE=1 
+bash /home/zc/carla/0_9_10_1/CarlaUE4.sh --world-port=$PT -opengl &
 
 # if the evaluator crash, run the carla simulator first, then execute this bash file in a new terminal
 sleep 6
 
-export CARLA_ROOT=/home/zc/LMDrive/carla
+# export CARLA_ROOT=/home/zc/LMDrive/carla
+export CARLA_ROOT=/home/zc/carla/0_9_10_1
 export CARLA_SERVER=${CARLA_ROOT}/CarlaUE4.sh
 export PYTHONPATH=$PYTHONPATH:${CARLA_ROOT}/PythonAPI
 export PYTHONPATH=$PYTHONPATH:${CARLA_ROOT}/PythonAPI/carla
@@ -13,6 +17,9 @@ export PYTHONPATH=$PYTHONPATH:$CARLA_ROOT/PythonAPI/carla/dist/carla-0.9.10-py3.
 export PYTHONPATH=$PYTHONPATH:leaderboard
 export PYTHONPATH=$PYTHONPATH:leaderboard/team_code
 export PYTHONPATH=$PYTHONPATH:scenario_runner
+
+export PYTHONPATH=$PYTHONPATH:/home/zc/LMDrive/LAVIS
+export PYTHONPATH=$PYTHONPATH:/home/zc/LMDrive/vision_encoder
 
 export LEADERBOARD_ROOT=/home/zc/LMDrive/leaderboard
 export CHALLENGE_TRACK_CODENAME=SENSORS
@@ -23,9 +30,9 @@ export REPETITIONS=1 # multiple evaluation runs
 export ROUTES=/home/zc/LMDrive/langauto/benchmark_tiny.xml
 # export ROUTES=/home/zc/LMDrive/langauto/benchmark_short.xml
 # export ROUTES=/home/zc/LMDrive/langauto/benchmark_long.xml
-export TEAM_AGENT=/home/zc/LMDrive/leaderboard/team_code/lmdriver_agent_new.py # agent
+export TEAM_AGENT=/home/zc/LMDrive/leaderboard/team_code/lmdriver_agent.py # agent
 export TEAM_CONFIG=/home/zc/LMDrive/leaderboard/team_code/lmdriver_config.py # model checkpoint, not required for expert
-export CHECKPOINT_ENDPOINT=results/sim_test_result.json # leaderboard statistic results file
+export CHECKPOINT_ENDPOINT=results/langauto_tiny_2.json # leaderboard statistic results file
 #export SCENARIOS=leaderboard/data/scenarios/no_scenarios.json #town05_all_scenarios.json
 export SCENARIOS=${LEADERBOARD_ROOT}/data/official/all_towns_traffic_scenarios_public.json
 export SAVE_PATH=data/eval # path for saving episodes while evaluating
