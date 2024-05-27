@@ -1,0 +1,8 @@
+py-trees==0.8.3
+tabulate
+shapely==2.0.3
+ephem
+dictor
+opencv-python==4.2.0.34
+transformers==4.31.0
+pygame
