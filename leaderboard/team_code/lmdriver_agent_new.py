@@ -14,7 +14,7 @@ import torch
 import carla
 import numpy as np
 from PIL import Image
-from easydict import EasyDict
+# from easydict import EasyDict
 from torchvision import transforms
 
 from leaderboard.autoagents import autonomous_agent
